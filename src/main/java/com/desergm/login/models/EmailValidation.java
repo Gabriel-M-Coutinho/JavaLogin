@@ -24,6 +24,8 @@ public class EmailValidation {
 
     public String token;
 
+    public boolean isUsed = false;
+
     @CreatedDate
     @Indexed(expireAfter = "5m")
     private Instant createdAt;

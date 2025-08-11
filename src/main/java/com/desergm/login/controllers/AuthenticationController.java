@@ -1,8 +1,10 @@
 package com.desergm.login.controllers;
 
+import com.desergm.login.dtos.EmailValidationDto;
 import com.desergm.login.dtos.RegisterResponseDto;
 import com.desergm.login.dtos.UserDto;
 import com.desergm.login.models.UserModel;
+import com.desergm.login.services.EmailValidationService;
 import com.desergm.login.services.RabbitMqService;
 import com.desergm.login.services.auth.TokenService;
 import com.desergm.login.services.UserService;
@@ -22,9 +24,10 @@ public class AuthenticationController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private TokenService tokenService;
-
     @Autowired
     private RabbitMqService rabbitMqService;
+    @Autowired
+    private EmailValidationService emailValidationService;
 
     /*
     @PostMapping("/login")
@@ -53,6 +56,9 @@ public class AuthenticationController {
             response.setMessage("Verifique seu e-mail para ativar sua conta");
             response.setStatus("OK");
             response.setUserId(newUser.getId());
+
+            emailValidationService.createEmailValidation(userDto.getEmail());
+
             // Aqui referencie o envio do e-mail de verificação
             // rabbitMqService.sendDto("queue-email-verify", newUser);
             return ResponseEntity.accepted().body(response);
@@ -61,6 +67,7 @@ public class AuthenticationController {
             response.setMessage("E-mail já cadastrado, mas não verificado. Verifique seu e-mail.");
             response.setStatus("ERROR");
             response.setUserId(existingUser.getId());
+            emailValidationService.createEmailValidation(userDto.getEmail());
             // Aqui referencie o envio do e-mail de verificação
             // rabbitMqService.sendDto("queue-email-verify", existingUser);
             return ResponseEntity.badRequest().body(response);
